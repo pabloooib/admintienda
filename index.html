@@ -148,10 +148,15 @@
         .media-uploader-box:hover, .media-uploader-box.dragover { border-color: var(--brand-gold); background: rgba(197, 168, 128, 0.02); }
         .media-uploader-box i { font-size: 1.8rem; color: var(--text-muted); margin-bottom: 12px; }
         .media-uploader-box p { font-size: 0.85rem; color: var(--text-main); }
-        .media-preview-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
-        .preview-img-wrapper { position: relative; height: 70px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-subtle); }
-        .preview-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .preview-img-wrapper .btn-del-img { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; font-size: 0.7rem; cursor: pointer; display: grid; place-items: center; }
+        
+        /* Contenedor flexible para alinear las imágenes de previsualización */
+        .media-preview-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            margin-top: 14px; 
+            min-height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -325,7 +330,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        // CREDENCIALES CONFIGURADAS CON EL NUEVO ENLACE DE STORAGE DE GOOGLE (.appspot.com)
+        // CREDENCIALES CONFIGURADAS CON EL SERVIDOR ALMACENAMIENTO DE CONTROL (.appspot.com)
         const firebaseConfig = {
             apiKey: "AIzaSyAdLGsavsans6OmLeyD_9TndcrAObDQgqA",
             authDomain: "bitacora-3fc27.firebaseapp.com",
@@ -342,7 +347,6 @@
         const storage = getStorage(app);
         const provider = new GoogleAuthProvider();
 
-        // CONTROL EXCLUSIVO DE SEGURIDAD CON TU CUENTA ADMINISTRADORA REAL
         const MASTER_ADMIN_EMAIL = "joseibz2006@gmail.com";
 
         let systemMemory = { products: [], categories: [], promos: [], banners: [], currentSection: 'products' };
@@ -545,7 +549,7 @@
             await updateDoc(doc(db, "products", productId), { stock: current, updatedAt: serverTimestamp() });
         };
 
-        // INTEGRACIÓN AVANZADA DE CARGA DE MEDIOS (CORREGIDO PARA SUBIDA DIRECTA EN RAÍZ)
+        // CONFIGURACIÓN DE ARRASTRE PARA MULTIMEDIA
         window.handleUploaderCoreBinding = function() {
             const dropzone = document.getElementById('media-dropzone');
             if(!dropzone) return;
@@ -563,6 +567,7 @@
             });
         };
 
+        // CAMBIO CRÍTICO: PIPELINE CON RE-RENDERIZACIÓN INMEDIATA FORZADA
         async function uploadFileToStoragePipeline(files) {
             const dropzone = document.getElementById('media-dropzone');
             const targetSection = document.getElementById('core-architect-form').dataset.mode;
@@ -570,11 +575,13 @@
             for(let file of files) {
                 dropzone.querySelector('p').innerText = `Subiendo: ${file.name}...`;
                 
-                // CORRECCIÓN DIRECTA: Guardamos los archivos en la raíz para saltar fallos de subdirectorios
+                // Enrutamiento directo a la raíz de Storage
                 const storageRef = ref(storage, `${Date.now()}_${file.name}`);
                 try {
                     const snap = await uploadBytes(storageRef, file);
                     const url = await getDownloadURL(snap.ref);
+                    
+                    console.log("Archivo subido con éxito a Storage. URL interna:", url);
                     
                     if (targetSection === 'products') {
                         if(!tempUploadedImages.main) {
@@ -585,25 +592,46 @@
                     } else {
                         tempUploadedImages.main = url;
                     }
+                    
+                    // LLAMADA CLAVE: Forzar pintado gráfico de la miniatura
                     renderUploadedMediaPreviews();
                 } catch(e) {
-                    console.error(e);
+                    console.error("Error durante la subida:", e);
                     alert("Error crítico en Storage Upload: " + e.message);
                 }
             }
             dropzone.querySelector('p').innerText = "Arrastra imágenes aquí o haz clic para usar cámara / galería";
         }
 
+        // CAMBIO CRÍTICO: REDISEÑO DE MINIATURAS CON ESTILOS EN LÍNEA DIRECTOS PARA PREVENIR COLAPSO
         function renderUploadedMediaPreviews() {
             const container = document.getElementById('previews-injector-container');
             if(!container) return;
+            
             let html = "";
+            
+            // Renderizado de Imagen de Portada Principal (Borde Dorado)
             if(tempUploadedImages.main) {
-                html += `<div class="preview-img-wrapper" title="Imagen de Portada Principal"><img src="${tempUploadedImages.main}"><button type="button" class="btn-del-img" onclick="deleteLocalPreview('main')">×</button></div>`;
+                html += `
+                    <div class="preview-img-wrapper" style="position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid var(--brand-gold); background: #141419;" title="Imagen Principal (Portada)">
+                        <img src="${tempUploadedImages.main}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                        <button type="button" class="btn-del-img" onclick="deleteLocalPreview('main')" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10;">×</button>
+                    </div>
+                `;
             }
-            tempUploadedImages.gallery.forEach((url, i) => {
-                html += `<div class="preview-img-wrapper" title="Galería secundaria"><img src="${url}"><button type="button" class="btn-del-img" onclick="deleteLocalPreview('gallery', ${i})">×</button></div>`;
-            });
+            
+            // Renderizado de Imágenes Secundarias para Galería (Borde Sutil)
+            if(tempUploadedImages.gallery && tempUploadedImages.gallery.length > 0) {
+                tempUploadedImages.gallery.forEach((url, i) => {
+                    html += `
+                        <div class="preview-img-wrapper" style="position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle); background: #141419;" title="Galería secundaria">
+                            <img src="${url}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                            <button type="button" class="btn-del-img" onclick="deleteLocalPreview('gallery', ${i})" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10;">×</button>
+                        </div>
+                    `;
+                });
+            }
+            
             container.innerHTML = html;
         }
 
@@ -724,7 +752,7 @@
             try {
                 if (mode === 'products') {
                     if(systemMemory.categories.length === 0) {
-                        alert("Error: No puedes guardar un producto sin asignar una categoría válida. Crea una primero en la sección 'Categorías'.");
+                        alert("Error: No puedes guardar un producto sin asignar una categoría válida. Créala primero en la sección 'Categorías'.");
                         return;
                     }
 
