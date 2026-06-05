@@ -109,7 +109,7 @@
         .core-table tr:last-child td { border-bottom: none; }
         .core-table tr:hover td { background: rgba(255,255,255,0.01); }
 
-        .img-table-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-subtle); background: #18181b; }
+        .img-table-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-subtle); background: #18181b; display: block; }
         .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
         .badge-status.active { background: rgba(16, 185, 129, 0.1); color: var(--ui-success); }
         .badge-status.draft { background: rgba(113, 113, 122, 0.1); color: var(--text-muted); }
@@ -149,7 +149,6 @@
         .media-uploader-box i { font-size: 1.8rem; color: var(--text-muted); margin-bottom: 12px; }
         .media-uploader-box p { font-size: 0.85rem; color: var(--text-main); }
         
-        /* Contenedor flexible para alinear las imágenes de previsualización */
         .media-preview-container { 
             display: flex; 
             flex-wrap: wrap; 
@@ -161,6 +160,7 @@
 </head>
 <body>
 
+    <!-- MONITOR DE SEGURIDAD EXCLUSIVO (LOCK SCREEN) -->
     <div id="auth-lock-screen">
         <div class="auth-card">
             <div class="auth-logo">SOUVREIGN CORE</div>
@@ -180,6 +180,7 @@
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD APP SIDEBAR -->
     <aside class="app-sidebar">
         <div>
             <div class="sidebar-brand"><div></div><span>SOUVREIGN CORE</span></div>
@@ -203,6 +204,7 @@
         </div>
     </aside>
 
+    <!-- CORE WORKSPACE INTERFACE -->
     <main class="workspace-core">
         <header class="workspace-header">
             <div class="workspace-title">
@@ -214,6 +216,7 @@
             </div>
         </header>
 
+        <!-- SECCIÓN: PRODUCTOS -->
         <div id="section-products" class="workspace-body-scroll active">
             <div class="data-table-card">
                 <div class="table-controls">
@@ -239,6 +242,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: CATEGORÍAS -->
         <div id="section-categories" class="workspace-body-scroll">
             <div class="data-table-card" style="max-width: 800px;">
                 <table class="core-table">
@@ -253,6 +257,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: PROMOCIONES -->
         <div id="section-promotions" class="workspace-body-scroll">
             <div class="data-table-card" style="max-width: 900px;">
                 <table class="core-table">
@@ -268,6 +273,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: BANNERS -->
         <div id="section-banners" class="workspace-body-scroll">
             <div class="data-table-card">
                 <table class="core-table">
@@ -284,6 +290,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: INVENTARIO & KÁRDEX -->
         <div id="section-inventory" class="workspace-body-scroll">
             <div class="metrics-grid">
                 <div class="metric-card"><span>Total Unidades Stock</span><h3 id="inv-metric-total">0</h3></div>
@@ -310,6 +317,7 @@
         </div>
     </main>
 
+    <!-- SIDE MODAL SLIDER SLIDE -->
     <div class="side-modal-overlay" id="ui-side-modal" onclick="closeCrudModal(event)">
         <div class="side-modal-container" onclick="event.stopPropagation()">
             <div class="modal-header-zone">
@@ -324,13 +332,13 @@
         </div>
     </div>
 
+    <!-- INTEGRACIÓN Y ARQUITECTURA DE DATOS FIREBASE JS SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        // CREDENCIALES CONFIGURADAS CON EL SERVIDOR ALMACENAMIENTO DE CONTROL (.appspot.com)
         const firebaseConfig = {
             apiKey: "AIzaSyAdLGsavsans6OmLeyD_9TndcrAObDQgqA",
             authDomain: "bitacora-3fc27.firebaseapp.com",
@@ -352,26 +360,20 @@
         let systemMemory = { products: [], categories: [], promos: [], banners: [], currentSection: 'products' };
         let tempUploadedImages = { main: "", gallery: [] };
 
-        // DETECTOR Y GUARDIÁN DE RUTA AUTENTICADA
         onAuthStateChanged(auth, (user) => {
             const lock = document.getElementById('auth-lock-screen');
             const errorOutput = document.getElementById('auth-error-output');
             
             if (user) {
                 const userEmail = user.email || (user.providerData && user.providerData[0] ? user.providerData[0].email : null);
-                console.log("Intento de acceso con el correo:", userEmail);
-
                 if (userEmail && userEmail.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase()) {
                     lock.style.opacity = '0';
                     setTimeout(() => lock.style.display = 'none', 300);
-                    
-                    document.getElementById('user-display-avatar').src = user.photoURL || 'https://via.placeholder.com/150';
+                    document.getElementById('user-display-avatar').src = user.photoURL || '';
                     document.getElementById('user-display-name').innerText = user.displayName || 'Administrador';
-                    
-                    errorOutput.innerText = ""; 
                     initializeRealtimeSyncEngine();
                 } else {
-                    errorOutput.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Acceso denegado.<br><span style="color:var(--text-muted); font-size:0.75rem;">El correo [${userEmail}] no está registrado como MASTER_ADMIN_EMAIL.</span>`;
+                    errorOutput.innerHTML = `Acceso denegado.`;
                     signOut(auth);
                 }
             } else {
@@ -381,23 +383,13 @@
         });
 
         window.executeAdminAuthentication = function() {
-            provider.addScope('email');
-            provider.addScope('profile');
-            
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    document.getElementById('auth-error-output').innerText = "";
-                })
-                .catch(err => {
-                    document.getElementById('auth-error-output').innerText = "Fallo de conexión Auth: " + err.message;
-                });
+            signInWithPopup(auth, provider).catch(err => console.error(err));
         };
 
         window.terminateSession = function() {
-            if(confirm("¿Cerrar sesión en el panel comercial?")) signOut(auth);
+            if(confirm("¿Cerrar sesión?")) signOut(auth);
         };
 
-        // ENGINE: CONEXIONES REALTIME FIRESTORE
         function initializeRealtimeSyncEngine() {
             onSnapshot(query(collection(db, "products"), orderBy("createdAt", "desc")), (snap) => {
                 systemMemory.products = [];
@@ -423,12 +415,10 @@
             });
         }
 
-        // CONTROLADOR DE VISTAS WORKSPACE
         window.switchSection = function(sectionId, element) {
             systemMemory.currentSection = sectionId;
             document.querySelectorAll('.workspace-body-scroll').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
             document.getElementById(`section-${sectionId}`).classList.add('active');
             element.classList.add('active');
 
@@ -453,23 +443,28 @@
             }
         };
 
-        // RENDER DE COMPONENTES DE TABLA INTELIGENTES
+        // CORRECCIÓN AQUÍ: Se añade crossorigin y se desactiva caché usando un token temporal de tiempo (?t=...)
         function renderWorkspaceTableProducts() {
             const target = document.getElementById('table-products-injector');
-            target.innerHTML = systemMemory.products.map(p => `
-                <tr>
-                    <td><img class="img-table-thumb" src="${p.mainImage || p.image || 'https://via.placeholder.com/100'}"></td>
-                    <td><div style="font-weight:600; color:white;">${p.name}</div><span style="font-size:0.75rem; color:var(--text-muted);">ID: ${p.id}</span></td>
-                    <td><span style="font-size:0.85rem; background:rgba(255,255,255,0.03); padding:4px 8px; border-radius:4px; border:1px solid var(--border-subtle);">${p.category}</span></td>
-                    <td><span style="font-weight:700;">Q${parseFloat(p.price).toFixed(2)}</span></td>
-                    <td><div style="font-weight:600; color:${p.stock <= p.stockMin ? 'var(--ui-error)' : 'var(--text-main)'}">${p.stock} Uds</div></td>
-                    <td><span class="badge-status ${p.status === 'active' ? 'active' : 'draft'}">${p.status === 'active' ? 'Producción' : 'Borrador'}</span></td>
-                    <td style="text-align:right;">
-                        <button class="btn-ui btn-secondary-ui" style="padding:6px 12px; font-size:0.8rem;" onclick="loadDocumentToEdit('products', '${p.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button class="btn-ui btn-danger-ui" style="padding:6px 12px; font-size:0.8rem;" onclick="executeDocumentDelete('products', '${p.id}')"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+            const timestampToken = Date.now();
+            target.innerHTML = systemMemory.products.map(p => {
+                const imgUrl = p.mainImage || p.image || 'https://via.placeholder.com/100';
+                const safeUrl = imgUrl.includes('firebasestorage') ? `${imgUrl}&t=${timestampToken}` : imgUrl;
+                return `
+                    <tr>
+                        <td><img class="img-table-thumb" src="${safeUrl}" crossorigin="anonymous" referrerpolicy="no-referrer"></td>
+                        <td><div style="font-weight:600; color:white;">${p.name}</div><span style="font-size:0.75rem; color:var(--text-muted);">ID: ${p.id}</span></td>
+                        <td><span style="font-size:0.85rem; background:rgba(255,255,255,0.03); padding:4px 8px; border-radius:4px; border:1px solid var(--border-subtle);">${p.category}</span></td>
+                        <td><span style="font-weight:700;">Q${parseFloat(p.price).toFixed(2)}</span></td>
+                        <td><div style="font-weight:600; color:${p.stock <= p.stockMin ? 'var(--ui-error)' : 'var(--text-main)'}">${p.stock} Uds</div></td>
+                        <td><span class="badge-status ${p.status === 'active' ? 'active' : 'draft'}">${p.status === 'active' ? 'Producción' : 'Borrador'}</span></td>
+                        <td style="text-align:right;">
+                            <button class="btn-ui btn-secondary-ui" style="padding:6px 12px; font-size:0.8rem;" onclick="loadDocumentToEdit('products', '${p.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="btn-ui btn-danger-ui" style="padding:6px 12px; font-size:0.8rem;" onclick="executeDocumentDelete('products', '${p.id}')"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function renderWorkspaceTableCategories() {
@@ -495,17 +490,22 @@
             `).join('');
         }
 
+        // CORRECCIÓN AQUÍ: Atributos seguros para los Banners
         function renderWorkspaceTableBanners() {
-            document.getElementById('table-banners-injector').innerHTML = systemMemory.banners.map(b => `
-                <tr>
-                    <td><img class="img-table-thumb" style="width:120px; height:50px;" src="${b.image}"></td>
-                    <td style="font-weight:600; color:white;">${b.title}</td>
-                    <td style="color:var(--text-muted); font-size:0.85rem;">${b.subtitle}</td>
-                    <td style="text-align:right;">
-                        <button class="btn-ui btn-danger-ui" style="padding:6px 12px; font-size:0.8rem;" onclick="executeDocumentDelete('banners', '${b.id}')"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+            const timestampToken = Date.now();
+            document.getElementById('table-banners-injector').innerHTML = systemMemory.banners.map(b => {
+                const safeUrl = b.image && b.image.includes('firebasestorage') ? `${b.image}&t=${timestampToken}` : b.image;
+                return `
+                    <tr>
+                        <td><img class="img-table-thumb" style="width:120px; height:50px;" src="${safeUrl}" crossorigin="anonymous" referrerpolicy="no-referrer"></td>
+                        <td style="font-weight:600; color:white;">${b.title}</td>
+                        <td style="color:var(--text-muted); font-size:0.85rem;">${b.subtitle}</td>
+                        <td style="text-align:right;">
+                            <button class="btn-ui btn-danger-ui" style="padding:6px 12px; font-size:0.8rem;" onclick="executeDocumentDelete('banners', '${b.id}')"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function renderWorkspaceInventory() {
@@ -541,7 +541,7 @@
             if(!product) return;
             let current = parseInt(product.stock || 0);
             if(qty === 'custom') {
-                let input = prompt(`Ajuste de inventario para: ${product.name}.\nIngrese el nuevo número total de existencias exactas:`, current);
+                let input = prompt(`Ajuste de inventario para: ${product.name}.\nIngrese el nuevo número total exacto:`, current);
                 if(input === null || isNaN(input)) return;
                 current = parseInt(input);
             } else { current += qty; }
@@ -549,7 +549,6 @@
             await updateDoc(doc(db, "products", productId), { stock: current, updatedAt: serverTimestamp() });
         };
 
-        // CONFIGURACIÓN DE ARRASTRE PARA MULTIMEDIA
         window.handleUploaderCoreBinding = function() {
             const dropzone = document.getElementById('media-dropzone');
             if(!dropzone) return;
@@ -567,21 +566,16 @@
             });
         };
 
-        // CAMBIO CRÍTICO: PIPELINE CON RE-RENDERIZACIÓN INMEDIATA FORZADA
         async function uploadFileToStoragePipeline(files) {
             const dropzone = document.getElementById('media-dropzone');
             const targetSection = document.getElementById('core-architect-form').dataset.mode;
             
             for(let file of files) {
                 dropzone.querySelector('p').innerText = `Subiendo: ${file.name}...`;
-                
-                // Enrutamiento directo a la raíz de Storage
                 const storageRef = ref(storage, `${Date.now()}_${file.name}`);
                 try {
                     const snap = await uploadBytes(storageRef, file);
                     const url = await getDownloadURL(snap.ref);
-                    
-                    console.log("Archivo subido con éxito a Storage. URL interna:", url);
                     
                     if (targetSection === 'products') {
                         if(!tempUploadedImages.main) {
@@ -593,39 +587,39 @@
                         tempUploadedImages.main = url;
                     }
                     
-                    // LLAMADA CLAVE: Forzar pintado gráfico de la miniatura
                     renderUploadedMediaPreviews();
                 } catch(e) {
-                    console.error("Error durante la subida:", e);
-                    alert("Error crítico en Storage Upload: " + e.message);
+                    console.error(e);
+                    alert("Error en Storage: " + e.message);
                 }
             }
             dropzone.querySelector('p').innerText = "Arrastra imágenes aquí o haz clic para usar cámara / galería";
         }
 
-        // CAMBIO CRÍTICO: REDISEÑO DE MINIATURAS CON ESTILOS EN LÍNEA DIRECTOS PARA PREVENIR COLAPSO
+        // CORRECCIÓN AQUÍ: Se inyecta crossorigin y bypass de caché también en el cuadro de previsualización interna del modal
         function renderUploadedMediaPreviews() {
             const container = document.getElementById('previews-injector-container');
             if(!container) return;
             
             let html = "";
+            const timestampToken = Date.now();
             
-            // Renderizado de Imagen de Portada Principal (Borde Dorado)
             if(tempUploadedImages.main) {
+                const safeUrl = tempUploadedImages.main.includes('firebasestorage') ? `${tempUploadedImages.main}&t=${timestampToken}` : tempUploadedImages.main;
                 html += `
-                    <div class="preview-img-wrapper" style="position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid var(--brand-gold); background: #141419;" title="Imagen Principal (Portada)">
-                        <img src="${tempUploadedImages.main}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                    <div class="preview-img-wrapper" style="position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid var(--brand-gold); background: #141419;">
+                        <img src="${safeUrl}" crossorigin="anonymous" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; display: block;">
                         <button type="button" class="btn-del-img" onclick="deleteLocalPreview('main')" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10;">×</button>
                     </div>
                 `;
             }
             
-            // Renderizado de Imágenes Secundarias para Galería (Borde Sutil)
             if(tempUploadedImages.gallery && tempUploadedImages.gallery.length > 0) {
                 tempUploadedImages.gallery.forEach((url, i) => {
+                    const safeUrl = url.includes('firebasestorage') ? `${url}&t=${timestampToken}` : url;
                     html += `
-                        <div class="preview-img-wrapper" style="position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle); background: #141419;" title="Galería secundaria">
-                            <img src="${url}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                        <div class="preview-img-wrapper" style="position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-subtle); background: #141419;">
+                            <img src="${safeUrl}" crossorigin="anonymous" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; display: block;">
                             <button type="button" class="btn-del-img" onclick="deleteLocalPreview('gallery', ${i})" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10;">×</button>
                         </div>
                     `;
@@ -641,7 +635,6 @@
             renderUploadedMediaPreviews();
         };
 
-        // FORMS SCHEMA GENERATOR & MODAL FACTORY
         window.openCrudModal = function(schemaType, editData = null) {
             const overlay = document.getElementById('ui-side-modal');
             const fieldsInjector = document.getElementById('dynamic-fields-injector');
@@ -664,9 +657,9 @@
                     <div class="form-group"><label>Descripción Detallada</label><textarea class="ui-input" id="p-desc" style="height:80px; resize:none;" required>${editData?.description || ''}</textarea></div>
                     <div class="form-row-dual">
                         <div class="form-group"><label>Línea / Categoría</label>
-                            <select class="ui-input" id="p-cat" required style="border-color: ${systemMemory.categories.length === 0 ? 'var(--ui-error)' : 'var(--border-subtle)'};">
+                            <select class="ui-input" id="p-cat" required>
                                 ${systemMemory.categories.length === 0 
-                                    ? `<option value="" disabled selected style="color:var(--ui-error);">⚠️ No hay categorías registradas. Créalas primero.</option>`
+                                    ? `<option value="" disabled selected>⚠️ No hay categorías.</option>`
                                     : systemMemory.categories.map(c => `<option value="${c.name}" ${editData?.category === c.name ? 'selected':''}>${c.name}</option>`).join('')
                                 }
                             </select>
@@ -739,7 +732,6 @@
             if(data) openCrudModal(section, data);
         };
 
-        // ENGINE: SALVAGUARDA DE DATOS FIRESTORE
         window.executeDocumentSave = async function(event) {
             event.preventDefault();
             const form = document.getElementById('core-architect-form');
@@ -752,10 +744,9 @@
             try {
                 if (mode === 'products') {
                     if(systemMemory.categories.length === 0) {
-                        alert("Error: No puedes guardar un producto sin asignar una categoría válida. Créala primero en la sección 'Categorías'.");
+                        alert("Error: No hay categorías.");
                         return;
                     }
-
                     payload = {
                         ...payload,
                         id: finalId,
@@ -785,17 +776,13 @@
                 await setDoc(doc(db, mode, finalId), payload, { merge: true });
                 forceCloseModal();
             } catch (err) {
-                alert("Fallo crítico al sincronizar con Firestore: " + err.message);
+                alert("Error al guardar: " + err.message);
             }
         };
 
         window.executeDocumentDelete = async function(collectionName, id) {
-            if(confirm("¿Confirmas la remoción permanente de este registro?\nEsta acción impactará de inmediato en la tienda del cliente.")) {
-                try {
-                    await deleteDoc(doc(db, collectionName, id));
-                } catch(e) {
-                    alert("Error al eliminar documento: " + e.message);
-                }
+            if(confirm("¿Eliminar registro?")) {
+                try { await deleteDoc(doc(db, collectionName, id)); } catch(e) { alert(e.message); }
             }
         };
 
