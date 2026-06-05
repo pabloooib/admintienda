@@ -325,12 +325,12 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        // CREDENCIALES EXACTAS DE TU PROYECTO CLIENTE ORIGINAL
+        // CREDENCIALES CONFIGURADAS CON EL NUEVO ENLACE DE STORAGE DE GOOGLE (.appspot.com)
         const firebaseConfig = {
             apiKey: "AIzaSyAdLGsavsans6OmLeyD_9TndcrAObDQgqA",
             authDomain: "bitacora-3fc27.firebaseapp.com",
             projectId: "bitacora-3fc27",
-            storageBucket: "bitacora-3fc27.firebasestorage.app",
+            storageBucket: "bitacora-3fc27.appspot.com", 
             messagingSenderId: "921769640813",
             appId: "1:921769640813:web:20173a75ebc52230595064",
             measurementId: "G-R9MPVSH7MW"
@@ -342,13 +342,13 @@
         const storage = getStorage(app);
         const provider = new GoogleAuthProvider();
 
-        // CONTROL EXCLUSIVO DE SEGURIDAD EN RUTA ADMIN (FILTRO DE PROPIETARIO)
-        const MASTER_ADMIN_EMAIL = "joseibz2006@gmail.com"; // <-- REEMPLAZA CON TU EMAIL EN MINÚSCULAS
+        // CONTROL EXCLUSIVO DE SEGURIDAD CON TU CUENTA ADMINISTRADORA REAL
+        const MASTER_ADMIN_EMAIL = "joseibz2006@gmail.com";
 
         let systemMemory = { products: [], categories: [], promos: [], banners: [], currentSection: 'products' };
         let tempUploadedImages = { main: "", gallery: [] };
 
-        // DETECTOR Y GUARDIÁN DE RUTA AUTENTICADA (CORREGIDO CON ALERTAS VISUALES)
+        // DETECTOR Y GUARDIÁN DE RUTA AUTENTICADA
         onAuthStateChanged(auth, (user) => {
             const lock = document.getElementById('auth-lock-screen');
             const errorOutput = document.getElementById('auth-error-output');
@@ -393,7 +393,7 @@
             if(confirm("¿Cerrar sesión en el panel comercial?")) signOut(auth);
         };
 
-        // ENGINE: CONEXIONES REALTIME FIRESTORE (SINCRONIZACIÓN INMEDIATA)
+        // ENGINE: CONEXIONES REALTIME FIRESTORE
         function initializeRealtimeSyncEngine() {
             onSnapshot(query(collection(db, "products"), orderBy("createdAt", "desc")), (snap) => {
                 systemMemory.products = [];
@@ -545,7 +545,7 @@
             await updateDoc(doc(db, "products", productId), { stock: current, updatedAt: serverTimestamp() });
         };
 
-        // INTEGRACIÓN AVANZADA DE CARGA DE MEDIOS (STORAGES COMPONENT)
+        // INTEGRACIÓN AVANZADA DE CARGA DE MEDIOS (CORREGIDO PARA SUBIDA DIRECTA EN RAÍZ)
         window.handleUploaderCoreBinding = function() {
             const dropzone = document.getElementById('media-dropzone');
             if(!dropzone) return;
@@ -569,7 +569,9 @@
             
             for(let file of files) {
                 dropzone.querySelector('p').innerText = `Subiendo: ${file.name}...`;
-                const storageRef = ref(storage, `comercial_${targetSection}/${Date.now()}_${file.name}`);
+                
+                // CORRECCIÓN DIRECTA: Guardamos los archivos en la raíz para saltar fallos de subdirectorios
+                const storageRef = ref(storage, `${Date.now()}_${file.name}`);
                 try {
                     const snap = await uploadBytes(storageRef, file);
                     const url = await getDownloadURL(snap.ref);
@@ -585,7 +587,8 @@
                     }
                     renderUploadedMediaPreviews();
                 } catch(e) {
-                    alert("Error crítico en Storage Upload pipeline: " + e.message);
+                    console.error(e);
+                    alert("Error crítico en Storage Upload: " + e.message);
                 }
             }
             dropzone.querySelector('p').innerText = "Arrastra imágenes aquí o haz clic para usar cámara / galería";
@@ -708,7 +711,7 @@
             if(data) openCrudModal(section, data);
         };
 
-        // ENGINE: SALVAGUARDA DE DATOS FIRESTORE (PERSISTENCIA TOTAL)
+        // ENGINE: SALVAGUARDA DE DATOS FIRESTORE
         window.executeDocumentSave = async function(event) {
             event.preventDefault();
             const form = document.getElementById('core-architect-form');
@@ -720,7 +723,6 @@
 
             try {
                 if (mode === 'products') {
-                    // Validar si se intenta enviar sin categorías
                     if(systemMemory.categories.length === 0) {
                         alert("Error: No puedes guardar un producto sin asignar una categoría válida. Crea una primero en la sección 'Categorías'.");
                         return;
