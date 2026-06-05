@@ -156,14 +156,12 @@
 </head>
 <body>
 
-    <!-- MONITOR DE SEGURIDAD EXCLUSIVO (LOCK SCREEN) -->
     <div id="auth-lock-screen">
         <div class="auth-card">
             <div class="auth-logo">SOUVREIGN CORE</div>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px;">Panel Comercial Privado. Se requiere autenticación del propietario de la licencia.</p>
             
             <button class="btn-ui btn-secondary-ui" style="width: 100%; justify-content: center; padding: 14px; gap: 12px; font-weight: 600;" onclick="executeAdminAuthentication()">
-                <!-- Mini Logo de Google SVG Premium -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 18px; height: 18px; display: block;">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -177,7 +175,6 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD APP SIDEBAR -->
     <aside class="app-sidebar">
         <div>
             <div class="sidebar-brand"><div></div><span>SOUVREIGN CORE</span></div>
@@ -201,7 +198,6 @@
         </div>
     </aside>
 
-    <!-- CORE WORKSPACE INTERFACE -->
     <main class="workspace-core">
         <header class="workspace-header">
             <div class="workspace-title">
@@ -213,7 +209,6 @@
             </div>
         </header>
 
-        <!-- SECCIÓN: PRODUCTOS -->
         <div id="section-products" class="workspace-body-scroll active">
             <div class="data-table-card">
                 <div class="table-controls">
@@ -239,7 +234,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN: CATEGORÍAS -->
         <div id="section-categories" class="workspace-body-scroll">
             <div class="data-table-card" style="max-width: 800px;">
                 <table class="core-table">
@@ -254,7 +248,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN: PROMOCIONES -->
         <div id="section-promotions" class="workspace-body-scroll">
             <div class="data-table-card" style="max-width: 900px;">
                 <table class="core-table">
@@ -270,7 +263,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN: BANNERS -->
         <div id="section-banners" class="workspace-body-scroll">
             <div class="data-table-card">
                 <table class="core-table">
@@ -287,7 +279,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN: INVENTARIO & KÁRDEX -->
         <div id="section-inventory" class="workspace-body-scroll">
             <div class="metrics-grid">
                 <div class="metric-card"><span>Total Unidades Stock</span><h3 id="inv-metric-total">0</h3></div>
@@ -314,7 +305,6 @@
         </div>
     </main>
 
-    <!-- SIDE MODAL SLIDER SLIDE (ESTILO CORE STRIPE GESTIÓN) -->
     <div class="side-modal-overlay" id="ui-side-modal" onclick="closeCrudModal(event)">
         <div class="side-modal-container" onclick="event.stopPropagation()">
             <div class="modal-header-zone">
@@ -329,7 +319,6 @@
         </div>
     </div>
 
-    <!-- INTEGRACIÓN Y ARQUITECTURA DE DATOS FIREBASE JS SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -354,20 +343,20 @@
         const provider = new GoogleAuthProvider();
 
         // CONTROL EXCLUSIVO DE SEGURIDAD EN RUTA ADMIN (FILTRO DE PROPIETARIO)
-        const MASTER_ADMIN_EMAIL = "joseibz2006@gmail.com"; // <-- REEMPLAZA CON TU EMAIL EN MINÚSCULAS
+        const MASTER_ADMIN_EMAIL = "tu-correo-administrador@gmail.com"; // <-- REEMPLAZA CON TU EMAIL EN MINÚSCULAS
 
         let systemMemory = { products: [], categories: [], promos: [], banners: [], currentSection: 'products' };
         let tempUploadedImages = { main: "", gallery: [] };
 
-        // DETECTOR Y GUARDIÁN DE RUTA AUTENTICADA (OPTIMIZADO)
+        // DETECTOR Y GUARDIÁN DE RUTA AUTENTICADA (CORREGIDO CON ALERTAS VISUALES)
         onAuthStateChanged(auth, (user) => {
             const lock = document.getElementById('auth-lock-screen');
             const errorOutput = document.getElementById('auth-error-output');
             
             if (user) {
-                // Forzar la extracción del email desde el proveedor si el nodo raíz viene null
                 const userEmail = user.email || (user.providerData && user.providerData[0] ? user.providerData[0].email : null);
-                
+                console.log("Intento de acceso con el correo:", userEmail);
+
                 if (userEmail && userEmail.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase()) {
                     lock.style.opacity = '0';
                     setTimeout(() => lock.style.display = 'none', 300);
@@ -378,7 +367,7 @@
                     errorOutput.innerText = ""; 
                     initializeRealtimeSyncEngine();
                 } else {
-                    errorOutput.innerText = `Acceso Restringido: El correo [${userEmail}] no posee privilegios comerciales.`;
+                    errorOutput.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Acceso denegado.<br><span style="color:var(--text-muted); font-size:0.75rem;">El correo [${userEmail}] no está registrado como MASTER_ADMIN_EMAIL.</span>`;
                     signOut(auth);
                 }
             } else {
@@ -388,7 +377,6 @@
         });
 
         window.executeAdminAuthentication = function() {
-            // Solicitamos scopes explícitos de perfil y correo
             provider.addScope('email');
             provider.addScope('profile');
             
@@ -491,7 +479,6 @@
             `).join('');
         }
 
-        // Corrección del mapeo del ID en promociones
         function renderWorkspaceTablePromos() {
             document.getElementById('table-promos-injector').innerHTML = systemMemory.promos.map(pr => `
                 <tr>
@@ -646,8 +633,11 @@
                     <div class="form-group"><label>Descripción Detallada</label><textarea class="ui-input" id="p-desc" style="height:80px; resize:none;" required>${editData?.description || ''}</textarea></div>
                     <div class="form-row-dual">
                         <div class="form-group"><label>Línea / Categoría</label>
-                            <select class="ui-input" id="p-cat" required>
-                                ${systemMemory.categories.map(c => `<option value="${c.name}" ${editData?.category === c.name ? 'selected':''}>${c.name}</option>`).join('')}
+                            <select class="ui-input" id="p-cat" required style="border-color: ${systemMemory.categories.length === 0 ? 'var(--ui-error)' : 'var(--border-subtle)'};">
+                                ${systemMemory.categories.length === 0 
+                                    ? `<option value="" disabled selected style="color:var(--ui-error);">⚠️ No hay categorías registradas. Créalas primero.</option>`
+                                    : systemMemory.categories.map(c => `<option value="${c.name}" ${editData?.category === c.name ? 'selected':''}>${c.name}</option>`).join('')
+                                }
                             </select>
                         </div>
                         <div class="form-group"><label>Estado del Artículo</label>
@@ -730,6 +720,12 @@
 
             try {
                 if (mode === 'products') {
+                    // Validar si se intenta enviar sin categorías
+                    if(systemMemory.categories.length === 0) {
+                        alert("Error: No puedes guardar un producto sin asignar una categoría válida. Crea una primero en la sección 'Categorías'.");
+                        return;
+                    }
+
                     payload = {
                         ...payload,
                         id: finalId,
