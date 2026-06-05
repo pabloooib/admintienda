@@ -42,7 +42,7 @@
         /* MONITOR DE BLOQUEO / SEGURIDAD AUTH */
         #auth-lock-screen {
             position: fixed; inset: 0; background: #030303; z-index: 9999;
-            display: grid; place-items: center; padding: 24px;
+            display: grid; place-items: center; padding: 24px; transition: opacity 0.3s ease;
         }
         .auth-card {
             background: #09090b; border: 1px solid var(--border-subtle);
@@ -147,7 +147,7 @@
         }
         .media-uploader-box:hover, .media-uploader-box.dragover { border-color: var(--brand-gold); background: rgba(197, 168, 128, 0.02); }
         .media-uploader-box i { font-size: 1.8rem; color: var(--text-muted); margin-bottom: 12px; }
-        .media-uploader-box p { font-size: 0.85rem; color: var(--text-body); }
+        .media-uploader-box p { font-size: 0.85rem; color: var(--text-main); }
         .media-preview-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
         .preview-img-wrapper { position: relative; height: 70px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-subtle); }
         .preview-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
@@ -156,18 +156,28 @@
 </head>
 <body>
 
+    <!-- MONITOR DE SEGURIDAD EXCLUSIVO (LOCK SCREEN) -->
     <div id="auth-lock-screen">
         <div class="auth-card">
             <div class="auth-logo">SOUVREIGN CORE</div>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px;">Panel Comercial Privado. Se requiere autenticación del propietario de la licencia.</p>
-            <button class="btn-ui btn-secondary-ui" style="width: 100%; justify-content: center; padding: 14px; gap: 12px;" onclick="executeAdminAuthentication()">
-                <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/copy_of_24dp.png" alt="Google" style="width:18px; height:18px;">
+            
+            <button class="btn-ui btn-secondary-ui" style="width: 100%; justify-content: center; padding: 14px; gap: 12px; font-weight: 600;" onclick="executeAdminAuthentication()">
+                <!-- Mini Logo de Google SVG Premium -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 18px; height: 18px; display: block;">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                </svg>
                 Identificarse con Google
             </button>
+            
             <p id="auth-error-output" style="color: var(--ui-error); font-size: 0.8rem; margin-top: 20px; font-weight: 500;"></p>
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD APP SIDEBAR -->
     <aside class="app-sidebar">
         <div>
             <div class="sidebar-brand"><div></div><span>SOUVREIGN CORE</span></div>
@@ -191,6 +201,7 @@
         </div>
     </aside>
 
+    <!-- CORE WORKSPACE INTERFACE -->
     <main class="workspace-core">
         <header class="workspace-header">
             <div class="workspace-title">
@@ -202,6 +213,7 @@
             </div>
         </header>
 
+        <!-- SECCIÓN: PRODUCTOS -->
         <div id="section-products" class="workspace-body-scroll active">
             <div class="data-table-card">
                 <div class="table-controls">
@@ -215,7 +227,7 @@
                         <tr>
                             <th>Imagen</th>
                             <th>Articulo</th>
-                            <th>Línea / Línea</th>
+                            <th>Línea / Categoría</th>
                             <th>Precio Real</th>
                             <th>Disponibilidad</th>
                             <th>Estado</th>
@@ -227,6 +239,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: CATEGORÍAS -->
         <div id="section-categories" class="workspace-body-scroll">
             <div class="data-table-card" style="max-width: 800px;">
                 <table class="core-table">
@@ -241,6 +254,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: PROMOCIONES -->
         <div id="section-promotions" class="workspace-body-scroll">
             <div class="data-table-card" style="max-width: 900px;">
                 <table class="core-table">
@@ -256,6 +270,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: BANNERS -->
         <div id="section-banners" class="workspace-body-scroll">
             <div class="data-table-card">
                 <table class="core-table">
@@ -272,6 +287,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: INVENTARIO & KÁRDEX -->
         <div id="section-inventory" class="workspace-body-scroll">
             <div class="metrics-grid">
                 <div class="metric-card"><span>Total Unidades Stock</span><h3 id="inv-metric-total">0</h3></div>
@@ -298,6 +314,7 @@
         </div>
     </main>
 
+    <!-- SIDE MODAL SLIDER SLIDE (ESTILO CORE STRIPE GESTIÓN) -->
     <div class="side-modal-overlay" id="ui-side-modal" onclick="closeCrudModal(event)">
         <div class="side-modal-container" onclick="event.stopPropagation()">
             <div class="modal-header-zone">
@@ -312,6 +329,7 @@
         </div>
     </div>
 
+    <!-- INTEGRACIÓN Y ARQUITECTURA DE DATOS FIREBASE JS SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -336,23 +354,31 @@
         const provider = new GoogleAuthProvider();
 
         // CONTROL EXCLUSIVO DE SEGURIDAD EN RUTA ADMIN (FILTRO DE PROPIETARIO)
-        const MASTER_ADMIN_EMAIL = "tu-correo-administrador@gmail.com"; // <-- IMPORTANTE: COLOCA TU CORREO REAL AQUÍ
+        const MASTER_ADMIN_EMAIL = "tu-correo-administrador@gmail.com"; // <-- REEMPLAZA CON TU EMAIL EN MINÚSCULAS
 
         let systemMemory = { products: [], categories: [], promos: [], banners: [], currentSection: 'products' };
         let tempUploadedImages = { main: "", gallery: [] };
 
-        // DETECTOR Y GUARDIÁN DE RUTA AUTENTICADA
+        // DETECTOR Y GUARDIÁN DE RUTA AUTENTICADA (OPTIMIZADO)
         onAuthStateChanged(auth, (user) => {
             const lock = document.getElementById('auth-lock-screen');
+            const errorOutput = document.getElementById('auth-error-output');
+            
             if (user) {
-                if (user.email === MASTER_ADMIN_EMAIL) {
+                // Forzar la extracción del email desde el proveedor si el nodo raíz viene null
+                const userEmail = user.email || (user.providerData && user.providerData[0] ? user.providerData[0].email : null);
+                
+                if (userEmail && userEmail.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase()) {
                     lock.style.opacity = '0';
                     setTimeout(() => lock.style.display = 'none', 300);
-                    document.getElementById('user-display-avatar').src = user.photoURL;
-                    document.getElementById('user-display-name').innerText = user.displayName;
+                    
+                    document.getElementById('user-display-avatar').src = user.photoURL || 'https://via.placeholder.com/150';
+                    document.getElementById('user-display-name').innerText = user.displayName || 'Administrador';
+                    
+                    errorOutput.innerText = ""; 
                     initializeRealtimeSyncEngine();
                 } else {
-                    document.getElementById('auth-error-output').innerText = `Acceso Restringido: El correo [${user.email}] no posee privilegios comerciales.`;
+                    errorOutput.innerText = `Acceso Restringido: El correo [${userEmail}] no posee privilegios comerciales.`;
                     signOut(auth);
                 }
             } else {
@@ -362,9 +388,17 @@
         });
 
         window.executeAdminAuthentication = function() {
-            signInWithPopup(auth, provider).catch(err => {
-                document.getElementById('auth-error-output').innerText = "Fallo de conexión Auth: " + err.message;
-            });
+            // Solicitamos scopes explícitos de perfil y correo
+            provider.addScope('email');
+            provider.addScope('profile');
+            
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    document.getElementById('auth-error-output').innerText = "";
+                })
+                .catch(err => {
+                    document.getElementById('auth-error-output').innerText = "Fallo de conexión Auth: " + err.message;
+                });
         };
 
         window.terminateSession = function() {
@@ -457,6 +491,7 @@
             `).join('');
         }
 
+        // Corrección del mapeo del ID en promociones
         function renderWorkspaceTablePromos() {
             document.getElementById('table-promos-injector').innerHTML = systemMemory.promos.map(pr => `
                 <tr>
@@ -659,7 +694,6 @@
                 `;
             }
 
-            // Inyección compartida de Drag and Drop Media Engine
             fieldsHtml += `
                 <div class="form-group" style="margin-top:10px;"><label>Multimedia Asociada</label>
                     <div class="media-uploader-box" id="media-dropzone">
@@ -679,7 +713,6 @@
         window.closeCrudModal = function(e) { if(e.target.id === 'ui-side-modal') forceCloseModal(); };
         window.forceCloseModal = function() { document.getElementById('ui-side-modal').classList.remove('active'); };
 
-        // EDIT CONTEXT LOADER
         window.loadDocumentToEdit = function(section, id) {
             const data = systemMemory[section].find(x => x.id === id);
             if(data) openCrudModal(section, data);
@@ -710,7 +743,7 @@
                         stockMin: parseInt(document.getElementById('p-stockmin').value),
                         featured: document.getElementById('p-featured').value === "true",
                         mainImage: tempUploadedImages.main,
-                        image: tempUploadedImages.main, // Sincronización cruzada con la tienda
+                        image: tempUploadedImages.main, 
                         galleryImages: tempUploadedImages.gallery
                     };
                 } else if(mode === 'categories') {
@@ -730,7 +763,6 @@
             }
         };
 
-        // ENGINE: REMOCIÓN DE DOCUMENTOS EN TIEMPO REAL
         window.executeDocumentDelete = async function(collectionName, id) {
             if(confirm("¿Confirmas la remoción permanente de este registro?\nEsta acción impactará de inmediato en la tienda del cliente.")) {
                 try {
@@ -741,7 +773,6 @@
             }
         };
 
-        // FILTRO BÚSQUEDA LOCAL CLIENT-SIDE
         window.filterLocalTable = function(section, queryStr) {
             const search = queryStr.toLowerCase().trim();
             if(section === 'products') {
